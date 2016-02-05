@@ -10,11 +10,14 @@
 #import "DetailViewController.h"
 #import <RestKit/RestKit.h>
 #import "MOVMovie.h"
+#import "MOVMovieTableViewCell.h"
 @interface MasterViewController ()
 
 @property NSMutableArray *objects;
 @property (strong, nonatomic) NSArray *movies;
 @property (nonatomic, strong) NSMutableArray *searchResult;
+@property (nonatomic, strong)  DetailViewController *controller;
+
 @end
 
 @implementation MasterViewController
@@ -75,10 +78,8 @@
 - (void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope
 {
     NSPredicate *resultPredicate = [NSPredicate predicateWithFormat:@"title contains[c] %@", searchText];
-    
     self.searchResult = [self.objects filteredArrayUsingPredicate:resultPredicate];
 }
-
 
 
 -(BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
@@ -99,14 +100,17 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
-//    self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
-//    if (!self.objects) {
+  if (!self.objects) {
         self.objects = [[NSMutableArray alloc] init];
-//    }
+   }
+    
      //Search
     self.searchResult = [NSMutableArray arrayWithCapacity:[self.objects count]];
     
-    NSLog(@"kdlakdl");
+    //DetailView controller
+    if(!controller)
+         controller = [[DetailViewController alloc] init];
+    
     //RESTKIT
     [self loadMovies];
 }
@@ -121,34 +125,12 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
     // Dispose of any resources that can be recreated.
 }
 
-- (void)insertNewObject:(id)sender {
-  /*  if (!self.objects) {
-        self.objects = [[NSMutableArray alloc] init];
-    }
-    [self.objects insertObject:[NSDate date] atIndex:0];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];*/
-}
-
 #pragma mark - Segues
-/*
-if ([segue.identifier isEqualToString:@"showRecipeDetail"]) {
-    RecipeDetailViewController *destViewController = segue.destinationViewController;
-    
-    NSIndexPath *indexPath = nil;
-    
-    if ([self.searchDisplayController isActive]) {
-        indexPath = [self.searchDisplayController.searchResultsTableView indexPathForSelectedRow];
-        destViewController.recipeName = [searchResults objectAtIndex:indexPath.row];
-        
-    } else {
-        indexPath = [self.tableView indexPathForSelectedRow];
-        destViewController.recipeName = [recipes objectAtIndex:indexPath.row];
-    }
-}*/
+
+@synthesize controller;
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
-      DetailViewController *controller = (DetailViewController *)[[segue destinationViewController] topViewController];
+   controller = (DetailViewController *)[segue destinationViewController] ;
         if (self.searchDisplayController.active) {
             NSLog(@"Search Display Controller");
             controller.detailItem = [self.searchResult objectAtIndex: self.searchDisplayController.searchResultsTableView.indexPathForSelectedRow.row];
@@ -156,7 +138,8 @@ if ([segue.identifier isEqualToString:@"showRecipeDetail"]) {
             NSLog(@"tututu Default Display Controller");
           controller.detailItem = [self.objects objectAtIndex: self.tableView.indexPathForSelectedRow.row];
         }
-         controller.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
+        
+        controller.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
         controller.navigationItem.leftItemsSupplementBackButton = YES;
     }
       }
@@ -181,34 +164,26 @@ if ([segue.identifier isEqualToString:@"showRecipeDetail"]) {
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-   // UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-
     static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    
+    MOVMovieTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil)
     {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[MOVMovieTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     MOVMovie *mov;
     if (tableView == self.searchDisplayController.searchResultsTableView)
     {
          mov = [self.searchResult objectAtIndex:indexPath.row];
-        //cell.textLabel.text = [[self.searchResult objectAtIndex:indexPath.row] title];
-    }
+       }
     else
     {
         mov = [self.objects objectAtIndex:indexPath.row];
-        //cell.textLabel.text = [self.objects[indexPath.row] title];
     }
     
-
-   // NSDate *object = self.objects[indexPath.row];
-  //  cell.textLabel.text = [self.objects[indexPath.row] title ];
-    
-    
     cell.textLabel.text = [mov title];
-    return cell;
+    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[mov releaseDate]];
+    
+    cell.yearLabel.text=[NSString stringWithFormat:@"%d",[components year]];    return cell;
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -218,23 +193,22 @@ if ([segue.identifier isEqualToString:@"showRecipeDetail"]) {
 
 - (void) tableView: (UITableView *) tableView didSelectRowAtIndexPath: (NSIndexPath *) indexPath
 {
-    DetailViewController *controller = [[DetailViewController alloc] init];
-    
     if (tableView == self.searchDisplayController.searchResultsTableView) {
         
         controller.detailItem = [self.searchResult objectAtIndex: self.searchDisplayController.searchResultsTableView.indexPathForSelectedRow.row];
-        
-        [self performSegueWithIdentifier: @"showDetail" sender:self];
+            [self performSegueWithIdentifier: @"showDetail" sender:self];
         
         NSLog(@"Search Display Controller");
     } else {
         
        controller.detailItem = [self.objects objectAtIndex: indexPath.row];
         
-       // [self performSegueWithIdentifier: @"showDetail" sender: self];
+        [self performSegueWithIdentifier: @"showDetail" sender: self];
         
         NSLog(@"Default Display Controller");
     }
+     controller.navigationItem.leftItemsSupplementBackButton = YES;
+    
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
