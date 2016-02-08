@@ -40,7 +40,9 @@
     if (self.detailItem) {
         self.title = [self.detailItem title];
         self.titleLabel.text= [self.detailItem title];
-        self.releaseDateLabel.text=[self.detailItem releaseDate];
+        NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[self.detailItem releaseDate]];
+        
+        self.releaseDateLabel.text=[NSString stringWithFormat:@"%d",[components year]];
         self.descriptionLabel.text=[self.detailItem overview];
         self.detailDescriptionLabel.text = [self.detailItem tagline];
         self.releaseDateLabel.numberOfLines =0;
