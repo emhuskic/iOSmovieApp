@@ -42,20 +42,20 @@
         self.titleLabel.text= [self.detailItem title];
         NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[self.detailItem releaseDate]];
         
-        self.releaseDateLabel.text=[NSString stringWithFormat:@"%d",[components year]];
+        self.releaseDateLabel.text=[NSString stringWithFormat:@"%ld",[components year]];
         self.descriptionLabel.text=[self.detailItem overview];
         self.detailDescriptionLabel.text = [self.detailItem tagline];
         self.releaseDateLabel.numberOfLines =0;
         [self.releaseDateLabel sizeToFit];
         self.genreLabel.text= [[[self.movie genres] firstObject] name];
       NSURL * urlLower = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@%@%@", @"http://image.tmdb.org/t/p/", @"w92", self.movie.posterPath]];
-        NSURL *urlUpper = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@%@%@", @"http://image.tmdb.org/t/p/", @"w184", self.movie.posterPath]];
+        NSURL *urlUpper = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@%@%@", @"http://image.tmdb.org/t/p/", @"w1280", self.movie.backdropPath]];
         //NSURL *url = [NSURL URLWithString:str];
         NSData *dataLower = [NSData dataWithContentsOfURL:urlLower];
         UIImage *imgLower= [[UIImage alloc] initWithData:dataLower];
         NSData *dataUpper = [NSData dataWithContentsOfURL:urlUpper];
         UIImage *imgUpper= [[UIImage alloc] initWithData:dataUpper];
-        self.upperImage.image=imgUpper;;
+        self.upperImage.image=imgUpper;
         self.lowerImage.image=imgLower;
         
     }

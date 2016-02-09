@@ -124,6 +124,7 @@
     [arr addObject:[[self.moviesDict objectForKey:@"popular"] objectAtIndex:i]];
     [arr addObject:[[self.moviesDict objectForKey:@"upcoming"] objectAtIndex:i]];
 }
+    
     self.searchResult = [arr filteredArrayUsingPredicate:resultPredicate];
  
    }
@@ -158,11 +159,12 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
     //DetailView controller
     if(!controller)
          controller = [[DetailViewController alloc] init];
+    //Movie for DetailView controller
     if(!self.movie)
         self.movie = [[MOVMovie alloc]init];
     //RESTKIT
     [self loadMovies];
-}
+ }
 
 - (void)viewWillAppear:(BOOL)animated {
     //self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
@@ -213,6 +215,7 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
    
     if (tableView == self.searchDisplayController.searchResultsTableView)
     {
+      //  NSLog(<#NSString * _Nonnull format, ...#>)
         return [self.searchResult count];
     }
     else
@@ -232,13 +235,16 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *CellIdentifier = @"Cell";
     MOVMovieTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    
      if (cell == nil)
      {
          cell = [[MOVMovieTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
          // cell.movies=[NSArray arrayWithArray:self.movies];
      }
-    if (indexPath.row==0) {cell.typeLabel.text=@"Top rated movies";  cell.movies=[NSArray arrayWithArray:[self.moviesDict objectForKey:@"top_rated"]];}
+    if([tableView isEqual:self.searchDisplayController.searchResultsTableView])
+    {
+    }
+    else{
+      if (indexPath.row==0) {cell.typeLabel.text=@"Top rated movies";  cell.movies=[NSArray arrayWithArray:[self.moviesDict objectForKey:@"top_rated"]];}
         
     else if (indexPath.row==1) {cell.typeLabel.text = @"Upcoming movies";  cell.movies=[NSArray arrayWithArray:[self.moviesDict objectForKey:@"upcoming"]];}
         
@@ -246,7 +252,7 @@ scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
      
     cell.backgroundColor=[UIColor whiteColor];
     cell.delegate=self;
-    self.MovieCell = cell;
+     }
     return cell;
 }
 
